@@ -1,9 +1,20 @@
 Class {
 	#name : 'AIShortestPathWithMaxAndMinNodesTest',
 	#superclass : 'TestCase',
+	#instVars : [
+		'fixture'
+	],
 	#category : 'AI-Algorithms-Graph-Tests',
 	#package : 'AI-Algorithms-Graph-Tests'
 }
+
+{ #category : 'running' }
+AIShortestPathWithMaxAndMinNodesTest >> setUp [
+	super setUp.
+	fixture := AIMinMaxGraphFixture new.
+
+	"Put here a common initialization logic for tests"
+]
 
 { #category : 'tests' }
 AIShortestPathWithMaxAndMinNodesTest >> testAmplifyingCycleBehindMinNode [
@@ -22,35 +33,34 @@ AIShortestPathWithMaxAndMinNodesTest >> testAmplifyingCycleBehindMinNode [
 { #category : 'tests' }
 AIShortestPathWithMaxAndMinNodesTest >> testAmplifyingNegativeCycle [
 
-    | algo edges |
+	| algo |
 
-    edges := #( #(1 2 10) #(2 3 -5) #(3 2 -5) #(2 4 10) ).
+	algo := AIShortestPathWithMaxAndMinNodes new.
 
-    algo := AIShortestPathWithMaxAndMinNodes new.
-    algo nodes: #(1 2 3 4).
-    algo edges: edges from: #first to: #second weight: #third.
+	algo nodes: fixture amplifyingCycleGraph nodes.
+	algo edges: fixture amplifyingCycleGraph edges from: #first to: #second weight: #third.
 
-    algo isMaxNodePredicate: [ :node | node = 2 ].
-    algo 
-    	start: 1;
-    	run.
+	algo isMaxNodePredicate: [ :node | node = 2 ].
+	algo 
+		start: 1;
+		run.
 
-    self assert: (algo distanceTo: 4 isLessThan: 100) equals: -1.
+	self assert: (algo distanceTo: 4 isLessThan: 100) equals: -1.
 ]
 
 { #category : 'tests' }
 AIShortestPathWithMaxAndMinNodesTest >> testDisconnectedGraph [
-    | algo edges |
 
-    edges := #( #(1 2 5) #(3 4 10) ).
+	| algo |
 
-    algo := AIShortestPathWithMaxAndMinNodes new.
-    algo nodes: #(1 2 3 4).
-    algo edges: edges from: #first to: #second weight: #third.
-    algo isMaxNodePredicate: [ :node | false ].
-    algo runFrom: 1.
+	algo := AIShortestPathWithMaxAndMinNodes new.
 
-    self assert: (algo distanceTo: 4 isLessThan: 100) equals: -1.
+	algo nodes: fixture disconnectedGraph nodes.
+	algo edges: fixture disconnectedGraph edges from: #first to: #second weight: #third.
+	algo isMaxNodePredicate: [ :node | false ].
+	algo runFrom: 1.
+
+	self assert: (algo distanceTo: 4 isLessThan: 100) equals: -1.
 ]
 
 { #category : 'tests' }
@@ -85,20 +95,19 @@ AIShortestPathWithMaxAndMinNodesTest >> testHarmlessCycleBehindMaxNode [
 { #category : 'tests' }
 AIShortestPathWithMaxAndMinNodesTest >> testHarmlessPositiveCycle [
 
-    | algo edges |
+	| algo |
 
-    edges := #( #(1 2 10) #(2 3 5) #(3 2 5) #(2 4 10) ).
+	algo := AIShortestPathWithMaxAndMinNodes new.
 
-    algo := AIShortestPathWithMaxAndMinNodes new.
-    algo nodes: #(1 2 3 4).
-    algo edges: edges from: #first to: #second weight: #third.
-    algo isMaxNodePredicate: [ :node | false ].
-    algo 
-    	start: 1;
-    	run.
+	algo nodes: fixture harmlessCycleGraph nodes.
+	algo edges: fixture harmlessCycleGraph edges from: #first to: #second weight: #third.
+	algo isMaxNodePredicate: [ :node | false ].
+	algo 
+		start: 1;
+		run.
 
-    self assert: (algo distanceTo: 4 isLessThan: 25) equals: 1. 
-    self assert: (algo distanceTo: 4 isLessThan: 15) equals: 0.
+	self assert: (algo distanceTo: 4 isLessThan: 25) equals: 1. 
+	self assert: (algo distanceTo: 4 isLessThan: 15) equals: 0.
 ]
 
 { #category : 'tests' }
@@ -127,15 +136,16 @@ AIShortestPathWithMaxAndMinNodesTest >> testLargeGraphPerformanceAndMemoization 
 { #category : 'tests' }
 AIShortestPathWithMaxAndMinNodesTest >> testLinearDAG [
 
-    | algo edges |
+	| algo |
 
-    edges := #( #(1 2 5) #(2 3 5) #(3 4 5) ).
-    algo := AIShortestPathWithMaxAndMinNodes new.
-    algo nodes: #(1 2 3 4); isMaxNodePredicate: [ :n | false ].
-    algo edges: edges from: #first to: #second weight: #third.
-    algo runFrom: 1.
-    self assert: (algo distanceTo: 4 isLessThan: 15) equals: 1.
-    self assert: (algo distanceTo: 4 isLessThan: 14) equals: -1.
+	algo := AIShortestPathWithMaxAndMinNodes new.
+
+	algo nodes: fixture linearDAG nodes; isMaxNodePredicate: [ :n | false ].
+	algo edges: fixture linearDAG edges from: #first to: #second weight: #third.
+	algo runFrom: 1.
+
+	self assert: (algo distanceTo: 4 isLessThan: 15) equals: 1.
+	self assert: (algo distanceTo: 4 isLessThan: 14) equals: -1.
 ]
 
 { #category : 'tests' }
@@ -187,59 +197,60 @@ AIShortestPathWithMaxAndMinNodesTest >> testMinVsMaxNodeLogic [
 { #category : 'tests' }
 AIShortestPathWithMaxAndMinNodesTest >> testMixedMinMaxLattice [
 
-    | algo edges |
+	| algo |
 
-    edges := #( #(1 2 5) #(1 3 10) #(2 4 0) #(3 4 0) #(1 5 15) #(1 6 20) #(5 7 0) #(6 7 0) #(4 8 0) #(7 8 0) ).
-    algo := AIShortestPathWithMaxAndMinNodes new.
-    algo nodes: #(1 2 3 4 5 6 7 8); isMaxNodePredicate: [ :n | n = 8 ].
-    algo edges: edges from: #first to: #second weight: #third.
-    algo runFrom: 1.
+	algo := AIShortestPathWithMaxAndMinNodes new.
 
-    self assert: (algo distanceTo: 8 isLessThan: 15) equals: 1.
-    self assert: (algo distanceTo: 8 isLessThan: 14) equals: -1.
+	algo nodes: fixture branchingGraph nodes; isMaxNodePredicate: [ :n | n = 8 ].
+	algo edges: fixture branchingGraph edges from: #first to: #second weight: #third.
+	algo runFrom: 1.
+
+	self assert: (algo distanceTo: 8 isLessThan: 15) equals: 1.
+	self assert: (algo distanceTo: 8 isLessThan: 14) equals: -1.
 ]
 
 { #category : 'tests' }
 AIShortestPathWithMaxAndMinNodesTest >> testMultipleMaxBranching [
 
-    | algo edges |
+	| algo |
 
-    edges := #( #(1 2 5) #(1 3 10) #(1 5 15) #(2 4 0) #(3 4 0) #(5 4 0) ).
-    algo := AIShortestPathWithMaxAndMinNodes new.
-    algo nodes: #(1 2 3 4 5); isMaxNodePredicate: [ :n | n = 4 ].
-    algo edges: edges from: #first to: #second weight: #third.
-    algo runFrom: 1.
+	algo := AIShortestPathWithMaxAndMinNodes new.
 
-    self assert: (algo distanceTo: 4 isLessThan: 15) equals: 1.
-    self assert: (algo distanceTo: 4 isLessThan: 14) equals: -1.
+	algo nodes: fixture multipleBranchingGraph nodes; isMaxNodePredicate: [ :n | n = 4 ].
+	algo edges: fixture multipleBranchingGraph edges from: #first to: #second weight: #third.
+	algo runFrom: 1.
+
+	self assert: (algo distanceTo: 4 isLessThan: 15) equals: 1.
+	self assert: (algo distanceTo: 4 isLessThan: 14) equals: -1.
 ]
 
 { #category : 'tests' }
 AIShortestPathWithMaxAndMinNodesTest >> testMultipleMinBranching [
 
-    | algo edges |
+	| algo |
 
-    edges := #( #(1 2 5) #(1 3 10) #(1 5 15) #(2 4 0) #(3 4 0) #(5 4 0) ).
-    algo := AIShortestPathWithMaxAndMinNodes new.
-    algo nodes: #(1 2 3 4 5); isMaxNodePredicate: [ :n | false ].
-    algo edges: edges from: #first to: #second weight: #third.
-    algo runFrom: 1.
+	algo := AIShortestPathWithMaxAndMinNodes new.
 
-    self assert: (algo distanceTo: 4 isLessThan: 5) equals: 1.
-    self assert: (algo distanceTo: 4 isLessThan: 4) equals: -1.
+	algo nodes: fixture multipleBranchingGraph nodes; isMaxNodePredicate: [ :n | false ].
+	algo edges: fixture multipleBranchingGraph edges from: #first to: #second weight: #third.
+	algo runFrom: 1.
+
+	self assert: (algo distanceTo: 4 isLessThan: 5) equals: 1.
+	self assert: (algo distanceTo: 4 isLessThan: 4) equals: -1.
 ]
 
 { #category : 'tests' }
 AIShortestPathWithMaxAndMinNodesTest >> testOverlappingPathsMemoization [
 
-    | algo edges |
+	| algo |
 
-    edges := #( #(1 2 5) #(1 3 5) #(2 4 5) #(3 4 5) #(4 5 5) ).
-    algo := AIShortestPathWithMaxAndMinNodes new.
-    algo nodes: #(1 2 3 4 5); isMaxNodePredicate: [ :n | false ].
-    algo edges: edges from: #first to: #second weight: #third.
-    algo runFrom: 1.
-    self assert: (algo distanceTo: 5 isLessThan: 15) equals: 1.
+	algo := AIShortestPathWithMaxAndMinNodes new.
+
+	algo nodes: fixture overlappingPathsGraph nodes; isMaxNodePredicate: [ :n | false ].
+	algo edges: fixture overlappingPathsGraph edges from: #first to: #second weight: #third.
+	algo runFrom: 1.
+
+	self assert: (algo distanceTo: 5 isLessThan: 15) equals: 1.
 ]
 
 { #category : 'tests' }
@@ -261,15 +272,14 @@ AIShortestPathWithMaxAndMinNodesTest >> testReducedLatticePropagation [
 { #category : 'tests' }
 AIShortestPathWithMaxAndMinNodesTest >> testStandardShortestPathDAG [
 
-    | algo edges |
-
-    edges := #( #(1 2 5) #(1 3 2) #(3 2 1) ).
+    | algo |
 
     algo := AIShortestPathWithMaxAndMinNodes new.
-    algo nodes: #(1 2 3).
-    algo edges: edges from: #first to: #second weight: #third.
-    algo isMaxNodePredicate: [ :node | false ].
-    algo runFrom: 1.
+
+	 algo nodes: fixture standardGraph nodes.
+	 algo edges: fixture standardGraph edges from: #first to: #second weight: #third.
+	 algo isMaxNodePredicate: [ :node | false ].
+	 algo runFrom: 1.
 
     self assert: (algo distanceTo: 2 isLessThan: 3) equals: 1.
     self assert: (algo distanceTo: 2 isLessThan: 2) equals: -1.
